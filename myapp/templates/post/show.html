@@ -57,15 +57,15 @@
                                                     <strong>Penulis</strong>
                                                 </td>
                                                 <td>:</td>
-                                                <td>{{ post.author_id.first_name }}</td> 
+                                                <td>{{ post.author_id.get_full_name }}</td> 
                                             </tr>
                                             <tr>
-                                    <td>
-                                       <strong>Dilihat</strong>
-                                    </td>
-                                    <td>:</td>
-                                    <td>{{ post.viewpost_set.count }}</td> 
-                                 </tr>
+                                                <td>
+                                                    <strong>Dilihat</strong>
+                                                </td>
+                                                <td>:</td>
+                                                <td>{{ post.viewpost_set.count }}</td> 
+                                            </tr>
                                             <tr>
                                                 <td>
                                                     <strong>Tampilkan?</strong>

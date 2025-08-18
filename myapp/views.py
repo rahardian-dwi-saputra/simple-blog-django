@@ -11,6 +11,7 @@ from . models import Category, Post, ViewPost
 
 from django.contrib import messages
 
+from django.db.models import Count
 
 """
 def register(request):
@@ -58,11 +59,15 @@ def logoutView(request):
 def dashboard(request):
     post = Post.objects.filter(author_id=request.user.id)
     traffic = ViewPost.objects.filter(post_id__in=post.values_list('id')).count()
+
+    popular_post = Post.objects.select_related("category_id").prefetch_related('viewpost_set').annotate(view_post=Count('viewpost__post_id')).filter(author_id=request.user.id, is_publish=True).values('slug','title','category_id__name','created_at','view_post').order_by('-view_post')[:4]
+    
     context = {
         'active':'Dashboard',
         'total_post': post.count(),
         'publish_post': post.filter(is_publish=True).count(),
         'total_traffic': traffic,
+        'popular_post': popular_post,
     }
     return render(request,'dashboard.html', context)
 
@@ -178,10 +183,7 @@ def show_post(request, slug):
 
 def update_post(request, slug):
     post = Post.objects.get(slug=slug)
-    data = {
-        'title':post.title
-    }
-    form = PostForm(request.POST or None,initial=data,instance=post)
+    form = PostForm(request.POST or None,instance=post)
     if request.method == "POST":
         if form.is_valid():
             try:
