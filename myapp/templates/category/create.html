@@ -1,0 +1,73 @@
+{% extends "main/base.html" %}
+{% block content %}
+
+{% load widget_tweaks %}
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Kategori</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Kategori</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">{{ title }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-6">
+
+                                    <form class="form-horizontal" method="post" action="{{ action }}">
+                                        {% csrf_token %}
+                                        <div class="form-group row">
+                                            <label for="{{ form.name.id_for_label }}" class="col-sm-3 col-form-label">
+                                                {{ form.name.label }}
+                                            </label>
+                                            <div class="col-sm-9">
+                                                
+                                                {% if form.name.errors %}
+                                                    {{ form.name|add_class:"is-invalid" }}
+                                                {% else %}
+                                                    {{ form.name }}
+                                                {% endif %}
+                                                
+                                                {% if form.name.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.name.errors|striptags }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-info">Simpan</button>&nbsp;&nbsp;
+                                        <a href="/category" class="btn btn-default">Kembali</a>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}

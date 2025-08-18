@@ -1,0 +1,182 @@
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Register | Simple Blog</title>
+
+      <link rel="icon" href="{% static 'dist/img/blogicon.png' %}">
+
+      <!-- Google Font: Source Sans Pro -->
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+      <!-- Font Awesome -->
+      <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+      <!-- icheck bootstrap -->
+      <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+      <!-- Theme style -->
+      <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+   </head>
+   <body class="hold-transition register-page">
+      <div class="register-box">
+         <div class="card card-outline card-primary">
+            <div class="card-header text-center">
+               <a href="#" class="h1"><b>Simple</b> Blog</a>
+            </div>
+            <div class="card-body">
+               <p class="login-box-msg">Buat Akun Baru</p>
+
+               {% if messages %}
+                  {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }}" role="alert">
+                     {{ message }}
+                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                     </button>
+                  </div>
+                  {% endfor %}
+               {% endif %}
+
+               <form action="{% url 'register' %}" method="post">
+                  {% csrf_token %}
+
+                  <div class="row mb-3">
+                     <div class="col-6 has-validation">
+                        <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                           {{ form.first_name.label }}
+                        </label>
+                        
+                        {% if form.first_name.errors %}
+                           {{ form.first_name|add_class:"is-invalid" }}
+                        {% else %}
+                           {{ form.first_name }}
+                        {% endif %}
+
+                        {% if form.first_name.errors %}
+                        <div class="invalid-feedback">
+                           {{ form.first_name.errors|striptags }}
+                        </div>
+                        {% endif %}
+                     </div>
+                     <div class="col-6">
+                        <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                           {{ form.last_name.label }}
+                        </label>
+
+                        {% if form.last_name.errors %}
+                           {{ form.last_name|add_class:"is-invalid" }}
+                        {% else %}
+                           {{ form.last_name }}
+                        {% endif %}
+
+                        {% if form.last_name.errors %}
+                        <div class="invalid-feedback">
+                           {{ form.last_name.errors|striptags }}
+                        </div>
+                        {% endif %}
+                     </div>
+                  </div>
+
+                  <div class="mb-3 has-validation">
+                     <label for="{{ form.username.id_for_label }}" class="form-label">
+                        {{ form.username.label }}
+                     </label>
+                     {% if form.username.errors %}
+                        {{ form.username|add_class:"is-invalid" }}
+                     {% else %}
+                        {{ form.username }}
+                     {% endif %}
+                     
+                     {% if form.username.errors %}
+                     <div class="invalid-feedback">
+                        {{ form.username.errors|striptags }}
+                     </div>
+                     {% endif %}
+                  </div>
+                  
+                  <div class="mb-3 has-validation">
+                     <label for="{{ form.email.id_for_label }}" class="form-label">
+                        {{ form.email.label }}
+                     </label>
+
+                     {% if form.email.errors %}
+                        {{ form.email|add_class:"is-invalid" }}
+                     {% else %}
+                        {{ form.email }}
+                     {% endif %}
+                     
+                     {% if form.email.errors %}
+                     <div class="invalid-feedback">
+                        {{ form.username.errors|striptags }}
+                     </div>
+                     {% endif %}
+                  </div>
+
+                  <div class="mb-3">
+                     <label for="{{ form.password1.id_for_label }}" class="form-label">
+                        {{ form.password1.label }}
+                     </label>
+                     
+                     {% if form.password1.errors %}
+                        {{ form.password1|add_class:"is-invalid" }}
+                     {% else %}
+                        {{ form.password1 }}
+                     {% endif %}
+
+                     {% if form.password1.errors %}
+                     <div class="invalid-feedback">
+                        {{ form.password1.errors|striptags }}
+                     </div>
+                     {% endif %}
+                  </div>
+
+                  <div class="mb-3">
+                     <label for="{{ form.password2.id_for_label }}" class="form-label">
+                        {{ form.password2.label }}
+                     </label>
+                     
+                     {% if form.password2.errors %}
+                        {{ form.password2|add_class:"is-invalid" }}
+                     {% else %}
+                        {{ form.password2 }}
+                     {% endif %}
+
+                     {% if form.password2.errors %}
+                     <div class="invalid-feedback">
+                        {{ form.password2.errors|striptags }}
+                     </div>
+                     {% endif %}
+                  </div>
+
+                  <div class="row">
+                     <div class="col-8">
+                        <div class="icheck-primary">
+                           <input type="checkbox" id="agreeTerms" name="terms" value="agree">
+                           <label for="agreeTerms">
+                              I agree to the <a href="#">terms</a>
+                           </label>
+                        </div>
+                     </div>
+                     
+                     <div class="col-4">
+                        <button type="submit" class="btn btn-primary btn-block">Register</button>
+                     </div>
+                  
+                  </div>
+
+               </form>
+
+               <a href="{% url 'login' %}" class="text-center">Saya sudah punya akun</a>
+            </div>
+         </div>
+      </div>
+
+      <!-- jQuery -->
+      <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+      <!-- Bootstrap 4 -->
+      <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+      <!-- AdminLTE App -->
+      <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+   </body>
+</html>
