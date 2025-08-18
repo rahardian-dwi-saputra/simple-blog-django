@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 
-from django.http import HttpResponse
 # Create your views here.
 from . forms import RegisterForm, CategoryForm, PostForm
 
@@ -12,18 +11,8 @@ from . models import Category, Post, ViewPost
 from django.contrib import messages
 
 from django.db.models import Count
+from django.http import HttpResponseForbidden
 
-"""
-def register(request):
-    if(request.method == "POST"):
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("login")
-    
-    form = CustomUserCreationForm()
-    return render(request,'authentication/register.html',{'form':form})
-"""
 
 def register(request):
     form = RegisterForm(request.POST or None)
@@ -71,11 +60,19 @@ def dashboard(request):
     }
     return render(request,'dashboard.html', context)
 
+@login_required
 def categories(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Anda tidak diizinkan mengakses halaman ini")
+    
     categories = Category.objects.all().values('name','slug')
     return render(request,'category/index.html', {'categories':categories,'active':'Category'})
 
+@login_required
 def create_category(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Anda tidak diizinkan mengakses halaman ini")
+    
     form = CategoryForm(request.POST or None)
     if request.method == "POST":
         if form.is_valid():
@@ -95,7 +92,11 @@ def create_category(request):
 
     return render(request,'category/create.html', context)
 
+@login_required
 def update_category(request, slug):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Anda tidak diizinkan mengakses halaman ini")
+    
     category = Category.objects.get(slug=slug)
     data = {
         'name':category.name,
@@ -117,8 +118,12 @@ def update_category(request, slug):
         'form':form,
     }
     return render(request,'category/create.html', context)
-    
+
+@login_required 
 def delete_category(request, slug):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Anda tidak diizinkan mengakses halaman ini")
+    
     category = Category.objects.filter(slug=slug)
     if(category.exists()):
         post = Post.objects.filter(category_id=category.get().id)
