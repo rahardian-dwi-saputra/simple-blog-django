@@ -1,11 +1,15 @@
 {% extends "main/base.html" %}
 {% block content %}
-{% if categories.count > 0 %}
+{% if users.count > 0 %}
 
 {% load static %}
 <style type="text/css">
-    table th, table td:nth-child(1), table td:nth-child(3){
+    #data-user th, #data-user td:nth-child(1), #data-user td:nth-child(5){
         text-align: center;
+    }
+    #data-user td:nth-child(6){
+        text-align: center;
+        white-space: nowrap;
     }
 </style>
 
@@ -22,7 +26,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">Kategori</li>
+                        <li class="breadcrumb-item active">User</li>
                     </ol>
                 </div>
             </div>
@@ -35,12 +39,12 @@
 
                     <div class="card card-info">
                         <div class="card-header">
-                            <h3 class="card-title">Daftar Kategori</h3>
+                            <h3 class="card-title">Daftar User</h3>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-lg-12">
-                                    <a href="{% url 'category-create' %}" class="btn btn-success">
+                                    <a href="{% url 'category-create' %}" class="btn btn-info">
                                         <i class="fa fa-plus-circle"></i> Tambah Kategori
                                     </a>
                                 </div>
@@ -80,11 +84,9 @@
                                                         <a href="{% url 'category-update' slug=category.slug %}" class="btn btn-warning btn-sm" title="Edit">
                                                             <i class="fa fa-edit"></i>
                                                         </a>
-                                                        
-                                                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-slug="{{ category.slug }}" data-target="#delete">
+                                                        <a href="{% url 'category-delete' slug=category.slug %}" class="btn btn-danger btn-sm" title="Hapus">
                                                             <i class="fa fa-trash"></i>
-                                                        </button>
-
+                                                        </a>
                                                     </td>
                                                 </tr> 
                                                 {% endfor %}
@@ -109,30 +111,6 @@
 </div>
 {% if categories.count > 0 %}
 
-<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel">
-    <div class="modal-dialog">
-        <div class="modal-content bg-danger">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmModalLabel">Konfirmasi</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form method="post" action="{% url 'category-delete' %}">
-            {% csrf_token %}
-            <div class="modal-body">
-                Apakah Anda yakin ingin menghapus data ini?
-                <input type="hidden" name="category_id" id="category_id" value="">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">Tidak</button>
-                <button type="submit" class="btn btn-warning">Ya</button>
-            </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
 <script>
@@ -140,14 +118,7 @@
         $('#table-category').DataTable();
     });
 
-    $('#delete').on('shown.bs.modal', function(event){
-        var button = $(event.relatedTarget)
-
-        var slug = button.data('slug')
-        var modal = $(this)
-        
-        modal.find('.modal-body #category_id').val(slug)
-    })
+    
 </script>
 {% endif %}
 {% endblock %}

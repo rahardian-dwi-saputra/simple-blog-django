@@ -6,6 +6,23 @@ from .models import Category, Post, ViewPost
 
 from django.utils import timezone
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
+
+User = get_user_model()
+
+class UserFactory(DjangoModelFactory):
+    class Meta:
+        model = User
+    
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    email = factory.Faker('email')
+    username = factory.Faker('user_name')
+    password = factory.LazyFunction(lambda: make_password('testpassword123'))
+    is_staff = False
+    is_superuser = False
+
 class PostFactory(DjangoModelFactory):
     class Meta:
         model = Post

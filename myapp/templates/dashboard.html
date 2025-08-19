@@ -117,7 +117,7 @@
                                                     <td>{{ post.view_post }}</td>
                                                     <td>{{ post.created_at|date:"d-m-Y H:i:s" }}</td>
                                                     <td>
-                                                        <a href="/post/{{ post.slug }}" class="btn btn-primary" title="Detail">
+                                                        <a href="{% url 'dashboard-post-show' slug=post.slug %}" class="btn btn-primary" title="Detail">
                                                             <i class="fa fa-eye"></i>
                                                         </a>
                                                     </td>

@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 from . models import Category, Post, ViewPost
+from django.contrib.auth.models import User
 
 from django.contrib import messages
 
@@ -120,23 +121,27 @@ def update_category(request, slug):
     return render(request,'category/create.html', context)
 
 @login_required 
-def delete_category(request, slug):
+def delete_category(request):
     if not request.user.is_superuser:
         return HttpResponseForbidden("Anda tidak diizinkan mengakses halaman ini")
     
-    category = Category.objects.filter(slug=slug)
-    if(category.exists()):
-        post = Post.objects.filter(category_id=category.get().id)
-        if(post.exists()):
-            messages.error(request, 'Data kategori tidak dapat dihapus karena sedang digunakan')
+    if request.POST.get('category_id', False):
+        slug = request.POST['category_id']
+        category = Category.objects.filter(slug=slug)
+        if(category.exists()):
+            post = Post.objects.filter(category_id=category.get().id)
+
+            if(post.exists()):
+                messages.error(request, 'Data kategori tidak dapat dihapus karena sedang digunakan')
+            else:
+                Category.objects.filter(slug=slug).delete()
+                messages.success(request, 'Data kategori berhasil dihapus')
         else:
-            Category.objects.filter(slug=slug).delete()
-            messages.success(request, 'Data kategori berhasil dihapus')
-    else:
-        messages.error(request, 'Data kategori tidak ditemukan')
+            messages.error(request, 'Data kategori tidak ditemukan')
 
-    return redirect('/category')
+    return redirect('category-list')
 
+@login_required
 def show_all_post(request):
     categories = Category.objects.all().values('name','slug')
     context = {
@@ -215,3 +220,11 @@ def delete_post(request, slug):
         messages.error(request, 'Postingan tidak ditemukan')
     
     return redirect('/post')
+
+def users(request):
+    users = User.objects.filter(is_superuser=False).values('id','username','email','date_joined')
+    context = {
+        'users':users,
+        'active':'Users'
+    }
+    return render(request,'user/index.html', context)

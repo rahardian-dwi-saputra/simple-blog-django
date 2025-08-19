@@ -40,6 +40,7 @@ class Post(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(
         max_length=250,
+        unique=True,
         validators=[
             MinLengthValidator(5, 'This field must be at least 5 characters long.'),
         ]
