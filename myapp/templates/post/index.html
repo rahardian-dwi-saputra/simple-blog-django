@@ -140,25 +140,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for post in posts %}
-                                                <tr>
-                                                    <td>{{ forloop.counter }}</td>
-                                                    <td>{{ post.title }}</td>
-                                                    <td>{{ post.category_id.name }}</td>
-                                                    <td>{{ post.is_publish }}</td>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td>
-                                                        <a href="/post/{{ post.slug }}" class="btn btn-primary btn-sm" title="Detail">
-                                                            <i class="fa fa-eye"></i>
-                                                        </a> 
-                                                        <a href="/post/edit/{{ post.slug }}/" class="btn btn-warning btn-sm" title="Edit">
-                                                            <i class="fa fa-edit"></i></a> 
-                                                        <a href="/post/delete/{{ post.slug }}/" class="btn btn-danger btn-sm" id="hapus" title="Hapus"><i class="fa fa-trash"></i></a>
-                                                    </td>
-                                                   
-                                                </tr>
-                                                {% endfor %}
+                                               
                                             </tbody>
                                         </table>
                                     </div>
@@ -185,6 +167,47 @@
 
         $('.date-picker').datepicker({
             dateFormat:"dd-mm-yy"
+        });
+
+        var table = $('#table-post').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{% url 'post-data' %}",
+                data: function (d) {
+                    d.category = $('#filter_kategori').val(),
+                    d.tampil = $('#filter_tampil').val(),
+                    d.tanggal_awal = $('#tanggal_awal').val(),
+                    d.tanggal_akhir = $('#tanggal_akhir').val()
+                }
+            },
+            columns: [
+               {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+               {data: 'title', name: 'title'},
+               {data: 'category', name: 'category'},
+               {data: 'publish', name: 'publish'},
+               {data: 'view', name: 'view'},
+               {data: 'created_at', name: 'created_at'},
+               {
+                  data: 'action', 
+                  name: 'action', 
+                  orderable: true, 
+                  searchable: true
+               },
+            ]
+        });
+
+        $('#table-filter').submit(function(e){
+            e.preventDefault();
+            table.draw();
+        });
+
+        $('button[type=reset]').click(function(){ 
+            $("#filter_kategori").val('').trigger('change');
+            $("#filter_tampil").val('').trigger('change');
+            $('#tanggal_awal').val('');
+            $('#tanggal_akhir').val('');
+            table.draw();
         });
 
     }); 

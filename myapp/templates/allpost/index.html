@@ -146,5 +146,41 @@
         </div>
     </section>
 </div>
+<script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/jquery-ui/jquery-ui.js' %}"></script>
+<script>
+    $(function (){ 
+        $('.date-picker').datepicker({
+            dateFormat:"dd-mm-yy"
+        });
 
+        var table = $('#table-post').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{% url 'all-post-json' %}",
+                data: function (d) {
+                    d.category = $('#filter_kategori').val(),
+                    d.tanggal_awal = $('#tanggal_awal').val(),
+                    d.tanggal_akhir = $('#tanggal_akhir').val()
+                }
+            },
+            columns: [
+                {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+               {data: 'title', name: 'title'},
+               {data: 'category', name: 'category'},
+               {data: 'author', name: 'author'},
+               {data: 'view', name: 'view'},
+               {data: 'created_at', name: 'created_at'},
+               {
+                  data: 'action', 
+                  name: 'action', 
+                  orderable: true, 
+                  searchable: true
+               },
+            ]
+        });
+    })
+</script>
 {% endblock %}

@@ -14,6 +14,8 @@ from django.contrib import messages
 from django.db.models import Count
 from django.http import HttpResponseForbidden
 
+from django.http import JsonResponse
+
 
 def register(request):
     form = RegisterForm(request.POST or None)
@@ -44,6 +46,10 @@ def loginView(request):
 def logoutView(request):
     logout(request)
     return redirect('login')
+
+def my_profile(request):
+    pass
+
 
 @login_required
 def dashboard(request):
@@ -145,25 +151,109 @@ def delete_category(request):
 def show_all_post(request):
     categories = Category.objects.all().values('name','slug')
     context = {
-        'categories':categories
+        'categories':categories,
+        'active':'Kelola Postingan'
     }
     return render(request,'allpost/index.html', context)
 
+def allpost_data(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+
+    queryset = Post.objects.select_related("category_id","author_id").prefetch_related('viewpost_set').annotate(view_post=Count('viewpost__post_id')).filter(is_publish=True)
+
+    if search_value:
+        queryset = queryset.filter(title__icontains=search_value) | queryset.filter(body__icontains=search_value)
+
+    total = queryset.count()
+    posts = queryset.order_by('-created_at')[start:start+length]
+
+    data = []
+    for i, post in enumerate(posts, start=start + 1):
+        data.append({
+            'DT_RowIndex': i,
+            'title': post.title,
+            'category': post.category_id.name,
+            'author': post.author_id.get_full_name(),
+            'view': post.view_post,
+            'created_at': post.created_at.strftime('%d-%m-%Y %H:%M'),
+            'action':'<a href="/allpost/detailpost/'+post.slug+'/" class="btn btn-primary btn-sm">'
+                        '<i class="fa fa-eye"></i> Detail'
+                    '</a>',
+        })
+
+    return JsonResponse({
+        'draw': draw,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+        'data': data
+    })
 
 def posts(request):
     categories = Category.objects.all().values('name','slug')
-    posts = Post.objects.select_related("category_id").all()
-    print(posts)
     context = {
         'categories':categories,
-        'posts':posts,
         'active':'Postingan Saya'
     }
     return render(request,'post/index.html', context)
 
+def post_data(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+
+    queryset = Post.objects.select_related("category_id").prefetch_related('viewpost_set').annotate(view_post=Count('viewpost__post_id')).filter(author_id=request.user.id)
+
+    if request.GET.get('category', False):
+        queryset = queryset.filter(category_id__slug=request.GET['category'])
+    
+    if request.GET.get('tampil', False):
+        if request.GET['tampil'] == 'Ya':
+            queryset = queryset.filter(is_publish=True)
+        else:
+            queryset = queryset.filter(is_publish=False)
+
+    if search_value:
+        queryset = queryset.filter(title__icontains=search_value) | queryset.filter(body__icontains=search_value)
+
+    total = queryset.count()
+    posts = queryset.order_by('-created_at')[start:start+length]
+
+    data = []
+    for i, post in enumerate(posts, start=start + 1):
+        if post.is_publish:
+            tampil = 'Ya'
+        else:
+            tampil = 'Tidak'
+
+        data.append({
+            'DT_RowIndex': i,
+            'title': post.title,
+            'category': post.category_id.name,
+            'publish': tampil,
+            'view': post.view_post,
+            'created_at': post.created_at.strftime('%d-%m-%Y %H:%M'),
+            'action':'<a href="/post/'+post.slug+'/" class="btn btn-primary btn-sm" title="Detail">'
+                        '<i class="fa fa-eye"></i>'
+                    '</a>&nbsp;'
+                    '<a href="/post/edit/'+post.slug+'/" class="btn btn-warning btn-sm" title="Edit">'
+                        '<i class="fa fa-edit"></i>'
+                    '</a>',
+        })
+
+    return JsonResponse({
+        'draw': draw,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+        'data': data
+    })
+
 @login_required
 def create_post(request):
-    form = PostForm(request.POST or None)
+    form = PostForm(request.POST or None, request.FILES or None)
     if request.method == "POST":
         if form.is_valid():
             instance = form.save(commit=False)
@@ -193,20 +283,20 @@ def show_post(request, slug):
 
 def update_post(request, slug):
     post = Post.objects.get(slug=slug)
-    form = PostForm(request.POST or None,instance=post)
+    form = PostForm(request.POST or None, request.FILES or None, instance=post)
     if request.method == "POST":
         if form.is_valid():
             try:
                 form.save()
-                messages.success(request, 'Data kategori berhasil diedit')
-                return redirect('/category') 
+                messages.success(request, 'Postingan berhasil diedit')
+                return redirect('list_posts') 
             except:
                 pass
 
     context = {
         'title':'Edit Postingan',
         'active':'Postingan Saya',
-        'action':'/post/'+slug+'/edit',
+        'action':'/post/edit/'+slug+'/',
         'form':form,
     }
     return render(request,'post/create.html', context)
@@ -222,9 +312,50 @@ def delete_post(request, slug):
     return redirect('/post')
 
 def users(request):
-    users = User.objects.filter(is_superuser=False).values('id','username','email','date_joined')
-    context = {
-        'users':users,
-        'active':'Users'
+    return render(request,'user/index.html', {'active':'Users'})
+
+def user_data(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    
+    # Get all records
+    #users = User.objects.filter(is_superuser=False).values('id','username','email','date_joined')
+    
+    queryset = User.objects.filter(is_superuser=False)
+    
+
+    if search_value:
+        queryset = queryset.filter(first_name__icontains=search_value)
+
+    total = queryset.count()
+
+    
+    # Ordering
+    order_column_index = request.GET.get('order[0][column]')
+    order_column = request.GET.get(f'columns[{order_column_index}][data]', 'name')
+    order_dir = request.GET.get('order[0][dir]', 'asc')
+    if order_dir == 'desc':
+        order_column = f'-{order_column}'
+
+    users = queryset.order_by(order_column)
+    
+    data = []
+    for i, user in enumerate(users, start=start + 1):
+        data.append({
+            'full_name': user.get_full_name(),
+            'username': user.username,
+            'email': user.email,
+            'date_joined': user.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
+        })
+
+    response = {
+        'draw': draw,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+        'data': data,
     }
-    return render(request,'user/index.html', context)
+    
+    return JsonResponse(response)
+    

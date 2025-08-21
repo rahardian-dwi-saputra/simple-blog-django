@@ -36,6 +36,13 @@
 
                                     <div class="table-responsive">
                                         <table class="table borderless">
+                                            {% if post.image %}
+                                            <tr>
+                                                <td colspan="3" style="text-align: center;">
+                                                    <img src="{{ post.image.url }}" width="500" height="300" />
+                                                </td>
+                                            </tr>
+                                            {% endif %}
                                             <tr>
                                                 <td width="14%">
                                                     <strong>Judul</strong>
@@ -109,7 +116,9 @@
                                 <div class="col-xs-12 col-sm-12 col-md-12">
                                     <div class="form-group">
                                         {% if '/dashboard/detailpost/' in request.path %}
-                                        <a href="{% url 'dashboard' %}" class="btn btn-info">Kembali</a> 
+                                        <a href="{% url 'dashboard' %}" class="btn btn-info">Kembali</a>
+                                        {% elif '/allpost/detailpost/' in request.path %}
+                                        <a href="{% url 'all-post' %}" class="btn btn-info">Kembali</a>
                                         {% else %}
                                         <a href="{{ back }}" class="btn btn-info">Kembali</a> 
                                         {% endif %}
