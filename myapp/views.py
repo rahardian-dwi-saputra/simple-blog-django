@@ -16,6 +16,7 @@ from django.http import HttpResponseForbidden
 
 from django.http import JsonResponse
 
+from datetime import datetime
 
 def register(request):
     form = RegisterForm(request.POST or None)
@@ -149,6 +150,9 @@ def delete_category(request):
 
 @login_required
 def show_all_post(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Anda tidak diizinkan mengakses halaman ini")
+    
     categories = Category.objects.all().values('name','slug')
     context = {
         'categories':categories,
@@ -156,13 +160,30 @@ def show_all_post(request):
     }
     return render(request,'allpost/index.html', context)
 
+@login_required
 def allpost_data(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'message':'Anda tidak diizinkan mengakses halaman ini'})
+    
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
     length = int(request.GET.get('length', 10))
     search_value = request.GET.get('search[value]', '')
 
     queryset = Post.objects.select_related("category_id","author_id").prefetch_related('viewpost_set').annotate(view_post=Count('viewpost__post_id')).filter(is_publish=True)
+
+    if request.GET.get('category', False):
+        queryset = queryset.filter(category_id__slug=request.GET['category'])
+    
+    if request.GET.get('tanggal_awal', False):
+        date_str = request.GET['tanggal_awal']
+        date_obj = datetime.strptime(date_str, '%d-%m-%Y').date()
+        queryset = queryset.filter(created_at__gte=date_obj)
+    
+    if request.GET.get('tanggal_akhir', False):
+        date_str = request.GET['tanggal_akhir']
+        date_obj = datetime.strptime(date_str, '%d-%m-%Y').date()
+        queryset = queryset.filter(created_at__lte=date_obj)
 
     if search_value:
         queryset = queryset.filter(title__icontains=search_value) | queryset.filter(body__icontains=search_value)
@@ -181,7 +202,10 @@ def allpost_data(request):
             'created_at': post.created_at.strftime('%d-%m-%Y %H:%M'),
             'action':'<a href="/allpost/detailpost/'+post.slug+'/" class="btn btn-primary btn-sm">'
                         '<i class="fa fa-eye"></i> Detail'
-                    '</a>',
+                    '</a>&nbsp;'
+                    '<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-slug="'+post.slug+'" data-target="#delete">'
+                    '<i class="fa fa-trash"></i> Hapus'
+                    '</button>',
         })
 
     return JsonResponse({
@@ -191,6 +215,24 @@ def allpost_data(request):
         'data': data
     })
 
+@login_required
+def allpost_delete(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Anda tidak diizinkan mengakses halaman ini")
+    
+    if request.POST.get('post_id', False):
+        slug = request.POST['post_id']
+        post = Post.objects.filter(slug=slug)
+        if(post.exists()):
+            ViewPost.objects.filter(post_id=post.get().id).delete()
+            Post.objects.filter(slug=slug).delete()
+            messages.success(request, 'Postingan berhasil dihapus')
+        else:
+            messages.error(request, 'Postingan tidak ditemukan')
+    
+    return redirect('all-post')
+
+@login_required
 def posts(request):
     categories = Category.objects.all().values('name','slug')
     context = {
@@ -199,6 +241,7 @@ def posts(request):
     }
     return render(request,'post/index.html', context)
 
+@login_required
 def post_data(request):
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
@@ -215,6 +258,16 @@ def post_data(request):
             queryset = queryset.filter(is_publish=True)
         else:
             queryset = queryset.filter(is_publish=False)
+
+    if request.GET.get('tanggal_awal', False):
+        date_str = request.GET['tanggal_awal']
+        date_obj = datetime.strptime(date_str, '%d-%m-%Y').date()
+        queryset = queryset.filter(created_at__gte=date_obj)
+    
+    if request.GET.get('tanggal_akhir', False):
+        date_str = request.GET['tanggal_akhir']
+        date_obj = datetime.strptime(date_str, '%d-%m-%Y').date()
+        queryset = queryset.filter(created_at__lte=date_obj)
 
     if search_value:
         queryset = queryset.filter(title__icontains=search_value) | queryset.filter(body__icontains=search_value)
@@ -241,7 +294,10 @@ def post_data(request):
                     '</a>&nbsp;'
                     '<a href="/post/edit/'+post.slug+'/" class="btn btn-warning btn-sm" title="Edit">'
                         '<i class="fa fa-edit"></i>'
-                    '</a>',
+                    '</a>&nbsp;'
+                    '<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-slug="'+post.slug+'" data-target="#delete">'
+                    '<i class="fa fa-trash"></i>'
+                    '</button>',
         })
 
     return JsonResponse({
@@ -271,6 +327,7 @@ def create_post(request):
 
     return render(request,'post/create.html', context)
 
+@login_required
 def show_post(request, slug):
     post = Post.objects.select_related("category_id","author_id").prefetch_related('viewpost_set').get(slug=slug)
     #tes = Post.objects.prefetch_related('viewpost_set').all() 
@@ -301,15 +358,19 @@ def update_post(request, slug):
     }
     return render(request,'post/create.html', context)
 
-def delete_post(request, slug):
-    post = Post.objects.filter(slug=slug)
-    if(post.exists()):
-        Post.objects.filter(slug=slug).delete()
-        messages.success(request, 'Postingan berhasil dihapus')
-    else:
-        messages.error(request, 'Postingan tidak ditemukan')
+@login_required
+def delete_post(request):
+    if request.POST.get('post_id', False):
+        slug = request.POST['post_id']
+        post = Post.objects.filter(slug=slug)
+        if(post.exists()):
+            ViewPost.objects.filter(post_id=post.get().id).delete()
+            Post.objects.filter(slug=slug).delete()
+            messages.success(request, 'Postingan berhasil dihapus')
+        else:
+            messages.error(request, 'Postingan tidak ditemukan')
     
-    return redirect('/post')
+    return redirect('list-posts')
 
 def users(request):
     return render(request,'user/index.html', {'active':'Users'})
