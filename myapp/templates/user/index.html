@@ -20,7 +20,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Kategori</h1>
+                    <h1>User</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -64,7 +64,7 @@
                                                     <th>Nama</th>
                                                     <th>Username</th>
                                                     <th>Email</th>
-                                                    <th>Tanggal Register</th>
+                                                    <th>Waktu Register</th>
                                                     <th>Action</th>          
                                                 </tr>
                                             </thead>
@@ -94,15 +94,22 @@
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{% url 'user_data' %}",
-                type: 'GET',
+                url: '{% url 'user_data' %}',
+                type: 'GET'
             },
             columns: [
-                {data: 'full_name'},
-                {data: 'username'},
-                {data: 'email'},
-                {data: 'date_joined'},
-            ],
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'full_name', name: 'full_name' },
+                { data: 'username', name: 'username' },
+                { data: 'email', name: 'email' },
+                { data: 'last_name', name: 'last_name' },
+                {
+                  data: 'action', 
+                  name: 'action', 
+                  orderable: true, 
+                  searchable: true
+               },
+            ]
         });
     });
 

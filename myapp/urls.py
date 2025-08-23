@@ -32,4 +32,5 @@ urlpatterns = [
 
     path("users", views.users, name="users"),
     path('api/users/', views.user_data, name='user_data'),
+    path("users/<int:id>/", views.detail_user, name="detail-user"),
 ]

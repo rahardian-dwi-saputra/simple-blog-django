@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from . models import Category, Post, ViewPost
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from django.contrib import messages
 
@@ -17,6 +18,8 @@ from django.http import HttpResponseForbidden
 from django.http import JsonResponse
 
 from datetime import datetime
+
+from django.http import HttpResponse
 
 def register(request):
     form = RegisterForm(request.POST or None)
@@ -372,51 +375,64 @@ def delete_post(request):
     
     return redirect('list-posts')
 
+@login_required
 def users(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Anda tidak diizinkan mengakses halaman ini")
+    
     return render(request,'user/index.html', {'active':'Users'})
 
+@login_required
 def user_data(request):
+    if not request.user.is_superuser:
+        return JsonResponse({"message":"Anda tidak diizinkan mengakses halaman ini"})
+    
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
     length = int(request.GET.get('length', 10))
     search_value = request.GET.get('search[value]', '')
-    
-    # Get all records
-    #users = User.objects.filter(is_superuser=False).values('id','username','email','date_joined')
-    
+
+    # Query
     queryset = User.objects.filter(is_superuser=False)
-    
-
-    if search_value:
-        queryset = queryset.filter(first_name__icontains=search_value)
-
     total = queryset.count()
 
-    
-    # Ordering
-    order_column_index = request.GET.get('order[0][column]')
-    order_column = request.GET.get(f'columns[{order_column_index}][data]', 'name')
-    order_dir = request.GET.get('order[0][dir]', 'asc')
-    if order_dir == 'desc':
-        order_column = f'-{order_column}'
+    if search_value:
+        queryset = queryset.filter(
+            Q(username__icontains=search_value) |
+            Q(email__icontains=search_value) |
+            Q(first_name__icontains=search_value) |
+            Q(last_name__icontains=search_value)
+        )
 
-    users = queryset.order_by(order_column)
-    
+    filtered = queryset.count()
+    queryset = queryset[start:start+length]
+
     data = []
-    for i, user in enumerate(users, start=start + 1):
+    for index, user in enumerate(queryset):
         data.append({
+            'DT_RowIndex': start + index + 1,
             'full_name': user.get_full_name(),
             'username': user.username,
             'email': user.email,
-            'date_joined': user.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
+            'last_name': user.date_joined.strftime('%d-%m-%Y %H:%M'),
+            'action': '<a href="/users/'+str(user.id)+'/" class="btn btn-primary btn-sm" title="Detail"><i class="fa fa-eye"></i></a>'
         })
 
-    response = {
+    return JsonResponse({
         'draw': draw,
         'recordsTotal': total,
-        'recordsFiltered': total,
+        'recordsFiltered': filtered,
         'data': data,
+    })
+
+@login_required
+def detail_user(request, id):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Anda tidak diizinkan mengakses halaman ini")
+    
+    user = User.objects.get(id=id)
+    context={
+        'active':'Users',
+        'user':user
     }
-    
-    return JsonResponse(response)
-    
+    return render(request,'user/show.html', context)
