@@ -99,7 +99,16 @@
                                         <div class="form-group row d-none" id="field-image">
                                             <label class="col-sm-2 col-form-label"></label>
                                             <div class="col-sm-5">
+                                                {% if '/post/edit/' in request.path %}
+                                                    {% if post_image %}
+                                                    <img src="{{ post_image.url }}" id="imagepreview" class="img-fluid" style="max-height: 200px; overflow-y: auto;" />
+                                                    {% else %}
+                                                    <img id="imagepreview" class="img-fluid" style="max-height: 200px; overflow-y: auto;" />
+                                                    {% endif %}
+                                                {% else %}
                                                 <img id="imagepreview" class="img-fluid" style="max-height: 200px; overflow-y: auto;" />
+                                                {% endif %}
+
                                                 <div></div>
                                             </div>
                                         </div>
@@ -193,7 +202,12 @@
     }   
 
     $(function(){ 
-        
+        {% if '/post/edit/' in request.path %}
+            {% if post_image %}
+            $('#field-image').removeClass('d-none');
+            {% endif %}
+        {% endif %}
+
         $("#image").change(function(){
             readURL(this);
         });

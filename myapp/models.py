@@ -7,6 +7,11 @@ from django.utils.html import strip_tags
 from django.core.validators import MinLengthValidator
 from django.core.validators import RegexValidator
 
+import os
+from django.db.models.signals import post_delete
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
 # Create your models here.
 class Category(models.Model):
     alphanumeric_with_spaces = RegexValidator(
@@ -83,3 +88,27 @@ class ViewPost(models.Model):
         db_table = 'view_posts'
         verbose_name = 'view post'
         verbose_name_plural = 'view posts'
+
+
+# Delete image file after post is deleted
+@receiver(post_delete, sender=Post)
+def delete_image_file(sender, instance, **kwargs):
+    if instance.image:
+        if os.path.isfile(instance.image.path):
+            os.remove(instance.image.path)
+
+# delete the old file when replacing the image
+@receiver(pre_save, sender=Post)
+def delete_old_image_on_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return  # New instance, no old file to delete
+
+    try:
+        old_file = Post.objects.get(pk=instance.pk).image
+    except Post.DoesNotExist:
+        return
+
+    new_file = instance.image
+    if old_file and old_file != new_file:
+        if os.path.isfile(old_file.path):
+            os.remove(old_file.path)

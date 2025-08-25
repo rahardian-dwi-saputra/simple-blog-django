@@ -192,3 +192,4 @@ class PostForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['category_id'].empty_label ="Pilih Kategori"
+        self.fields['image'].widget.template_name = 'widget/custom_image_widget.html'

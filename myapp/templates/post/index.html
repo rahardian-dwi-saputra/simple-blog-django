@@ -133,9 +133,9 @@
                                                     <th>No</th>
                                                     <th>Judul</th>
                                                     <th>Kategori</th>
-                                                    <th>Tampilkan</th>
+                                                    <th>Tampilkan?</th>
                                                     <th>Dilihat</th>
-                                                    <th>Tanggal Posting</th>
+                                                    <th>Waktu Posting</th>
                                                     <th>Action</th>          
                                                 </tr>
                                             </thead>
@@ -205,6 +205,7 @@
                     d.tanggal_akhir = $('#tanggal_akhir').val()
                 }
             },
+            order: [[ 1, 'desc' ]],
             columns: [
                {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                {data: 'title', name: 'title'},

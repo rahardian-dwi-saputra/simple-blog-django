@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp',
     'widget_tweaks',
+    'front',
 ]
 
 #AUTH_USER_MODEL = "myapp.User"

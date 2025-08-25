@@ -19,8 +19,6 @@ from django.http import JsonResponse
 
 from datetime import datetime
 
-from django.http import HttpResponse
-
 def register(request):
     form = RegisterForm(request.POST or None)
     if request.method == 'POST':
@@ -189,10 +187,33 @@ def allpost_data(request):
         queryset = queryset.filter(created_at__lte=date_obj)
 
     if search_value:
-        queryset = queryset.filter(title__icontains=search_value) | queryset.filter(body__icontains=search_value)
+        queryset = queryset.filter(
+            Q(title__icontains=search_value) |
+            Q(category_id__name__icontains=search_value) |
+            Q(author_id__first_name__icontains=search_value) |
+            Q(view_post__icontains=search_value)
+        )
 
     total = queryset.count()
-    posts = queryset.order_by('-created_at')[start:start+length]
+
+    # Order by
+    order_column_index = request.GET.get("order[0][column]", 1)
+    order_column = request.GET.get(f"columns[{order_column_index}][data]", "created_at")
+
+    if order_column in ["DT_RowIndex","action"]:
+        order_column = "created_at"
+    elif order_column == "category":
+        order_column = "category_id__name"
+    elif order_column == "author":
+        order_column = "author_id__first_name"
+    elif order_column == "view":
+        order_column = "view_post"
+
+    order_dir = request.GET.get("order[0][dir]", "asc")
+    if order_dir == "desc":
+        order_column = f"-{order_column}"
+
+    posts = queryset.order_by(order_column)[start:start+length]
 
     data = []
     for i, post in enumerate(posts, start=start + 1):
@@ -273,10 +294,33 @@ def post_data(request):
         queryset = queryset.filter(created_at__lte=date_obj)
 
     if search_value:
-        queryset = queryset.filter(title__icontains=search_value) | queryset.filter(body__icontains=search_value)
+        queryset = queryset.filter(
+            Q(title__icontains=search_value) |
+            Q(category_id__name__icontains=search_value) |
+            Q(view_post__icontains=search_value)
+        )
 
     total = queryset.count()
-    posts = queryset.order_by('-created_at')[start:start+length]
+
+    # Order by
+    order_column_index = request.GET.get("order[0][column]", 1)
+    order_column = request.GET.get(f"columns[{order_column_index}][data]", "created_at")
+
+    if order_column in ["DT_RowIndex","action"]:
+        order_column = "created_at"
+    elif order_column == "category":
+        order_column = "category_id__name"
+    elif order_column == "publish":
+        order_column = "is_publish"
+    elif order_column == "view":
+        order_column = "view_post"
+
+    order_dir = request.GET.get("order[0][dir]", "asc")
+    if order_dir == "desc":
+        order_column = f"-{order_column}"
+
+
+    posts = queryset.order_by(order_column)[start:start+length]
 
     data = []
     for i, post in enumerate(posts, start=start + 1):
@@ -319,7 +363,7 @@ def create_post(request):
             instance.author_id = request.user
             instance.save()
             messages.success(request, 'Postingan baru berhasil ditambahkan')
-            return redirect('list_posts') 
+            return redirect('list-posts') 
            
     context = {
         'title':'Buat Postingan Baru',
@@ -349,12 +393,13 @@ def update_post(request, slug):
             try:
                 form.save()
                 messages.success(request, 'Postingan berhasil diedit')
-                return redirect('list_posts') 
+                return redirect('list-posts') 
             except:
                 pass
 
     context = {
         'title':'Edit Postingan',
+        'post_image':post.image,
         'active':'Postingan Saya',
         'action':'/post/edit/'+slug+'/',
         'form':form,
@@ -405,7 +450,21 @@ def user_data(request):
         )
 
     filtered = queryset.count()
-    queryset = queryset[start:start+length]
+
+    # Order by
+    order_column_index = request.GET.get("order[0][column]", 1)
+    order_column = request.GET.get(f"columns[{order_column_index}][data]", "first_name")
+    
+    if order_column in ["DT_RowIndex", "full_name"]:
+        order_column = "first_name"
+    elif order_column == "action":
+        order_column = "id"
+
+    order_dir = request.GET.get("order[0][dir]", "asc")
+    if order_dir == "desc":
+        order_column = f"-{order_column}"
+
+    queryset = queryset.order_by(order_column)[start:start+length]
 
     data = []
     for index, user in enumerate(queryset):
@@ -414,7 +473,7 @@ def user_data(request):
             'full_name': user.get_full_name(),
             'username': user.username,
             'email': user.email,
-            'last_name': user.date_joined.strftime('%d-%m-%Y %H:%M'),
+            'date_joined': user.date_joined.strftime('%d-%m-%Y %H:%M'),
             'action': '<a href="/users/'+str(user.id)+'/" class="btn btn-primary btn-sm" title="Detail"><i class="fa fa-eye"></i></a>'
         })
 

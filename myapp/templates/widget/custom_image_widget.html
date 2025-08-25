@@ -1,0 +1,5 @@
+<input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+{% if widget.value and not widget.is_initial %}
+    <br>
+    <!-- You can display the image here if you want, or remove this block entirely -->
+{% endif %}
