@@ -158,3 +158,7 @@ MESSAGE_TAGS = {
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # this is the global static folder
+]

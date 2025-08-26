@@ -13,7 +13,7 @@ static_root/
 .env
 
 # If you're using Django's collectstatic:
-static/
+#static/
 
 # Ignore Django migrations (optional)
 **/migrations/*.py
