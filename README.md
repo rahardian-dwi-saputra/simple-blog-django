@@ -29,7 +29,7 @@ Aplikasi ini dibangun dengan menggunakan :
 ## Instalasi
 - Cloning repository git ke sebuah folder di local
 ```sh
-git clone rahardian-dwi-saputra/simple-blog-django
+git clone https://github.com/rahardian-dwi-saputra/simple-blog-django.git
 cd simple-blog-django
 ```
 - Buat and aktifkan virtual environment (Optional)
@@ -74,6 +74,7 @@ python manage.py shell
 >>>b = PostFactory.create_batch(30)
 >>>from myapp.factory import ViewPostFactory
 >>>c = ViewPostFactory.create_batch(80)
+>>>exit()
 ```
 - Jalankan projek
 ```sh
