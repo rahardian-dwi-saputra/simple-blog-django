@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from . forms import RegisterForm, CategoryForm, PostForm
+from . forms import RegisterForm, CustomPasswordChangeForm, CategoryForm, PostForm, UserForm
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
 
 from . models import Category, Post, ViewPost
 from django.contrib.auth.models import User
@@ -18,6 +19,9 @@ from django.http import HttpResponseForbidden
 from django.http import JsonResponse
 
 from datetime import datetime
+
+#from django.http import HttpResponse
+#from .models import UserProfile
 
 def register(request):
     form = RegisterForm(request.POST or None)
@@ -49,9 +53,42 @@ def logoutView(request):
     logout(request)
     return redirect('login')
 
-def my_profile(request):
-    pass
+"""
+def create_profile(request):
+    for user in User.objects.all():
+        UserProfile.objects.get_or_create(user=user)
+    return HttpResponse("Data Selesai Dibuat")
+"""
 
+@login_required
+def my_profile(request):
+    return render(request,'profile/myprofile.html')
+
+@login_required
+def update_profile(request):
+    user = request.user
+    form = UserForm(request.POST or None, instance=user)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Data profil berhasil diperbarui')
+            return redirect('/myprofile')
+    
+    return render(request,'profile/edit.html', {'form':form})
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = CustomPasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # keep user logged in
+            messages.success(request, 'Password berhasil diperbarui')
+            return redirect('/myprofile')
+    else:
+        form = CustomPasswordChangeForm(user=request.user)
+
+    return render(request, 'profile/ubah_sandi.html', {'form': form})
 
 @login_required
 def dashboard(request):

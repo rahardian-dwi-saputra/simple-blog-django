@@ -1,0 +1,97 @@
+{% extends "main/base.html" %}
+{% block content %}
+{% load widget_tweaks %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Profile</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">My Profile</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">Ubah Sandi</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-7">
+
+                                    <form class="form-horizontal" method="post" action="{% url 'change_password' %}">
+                                        {% csrf_token %}
+
+
+                                        {% for field in form %}
+                                        <div class="form-group row">
+                                            <label for="{{ field.id_for_label }}" class="col-sm-5 col-form-label">
+                                                {{ field.label }} <span style="color:red;">*</span>
+                                            </label>
+                                            <div class="input-group col-sm-6 field-password">
+                                                {% if field.errors %}
+                                                    {{ field|add_class:"is-invalid" }}
+                                                {% else %}
+                                                    {{ field }}
+                                                {% endif %}
+
+                                                <div class="input-group-append">  
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-eye-slash"></i>
+                                                    </span>
+                                                </div>
+                                                {% if field.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ field.errors|striptags }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+
+                                        <button type="submit" class="btn btn-info">Simpan</button>&nbsp;&nbsp;
+                                        <a href="{% url 'my-profile' %}" class="btn btn-default">Kembali</a>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<script>
+    $(document).ready(function(){ 
+        $('.field-password span').on('click', function(event){ 
+            event.preventDefault();
+            var element = $(this).parent().parent().find('input');
+
+            if(element.attr('type') == 'text'){
+                element.attr('type', 'password');
+                $(this).find('i').removeClass("fa-eye");
+                $(this).find('i').addClass("fa-eye-slash");
+            }else{
+                element.attr('type', 'text');
+                $(this).find('i').removeClass("fa-eye-slash");
+                $(this).find('i').addClass("fa-eye");
+            }
+
+        });
+    });
+</script>
+{% endblock %}

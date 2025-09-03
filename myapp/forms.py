@@ -1,9 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 
-from .models import Category
-from .models import Post
+from .models import Category, Post
 from django.forms import ModelForm
 
 class RegisterForm(UserCreationForm):
@@ -53,6 +52,32 @@ class RegisterForm(UserCreationForm):
             'placeholder': 'Confirm password'
         })
 
+class CustomPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super(CustomPasswordChangeForm, self).__init__(*args, **kwargs)
+
+        # Customize field labels, help texts, or widgets here
+        self.fields['old_password'].label = "Current Password"
+        self.fields['old_password'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Current Password',
+            'id':'old_password'
+        })
+
+        self.fields['new_password1'].label = "New Password"
+        self.fields['new_password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'New password',
+            'id':'new_password1'
+        })
+
+        self.fields['new_password2'].label = "Confirm New Password"
+        self.fields['new_password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Repeat new password',
+            'id':'new_password2'
+        })
+
 class CategoryForm(ModelForm):
     class Meta:
         model = Category
@@ -98,55 +123,6 @@ class CategoryForm(forms.Form):
             self.add_error("name", "Minimal 5 karakter")
              
         return name
-   
-
-class PostForm(forms.Form):
-    title = forms.CharField(
-        label='Judul',
-        required=False,
-        widget=forms.TextInput(attrs={
-            'id':'title',
-            'class':'form-control',
-            'placeholder':'Judul',
-            'autofocus':'autofocus'
-        })
-    )
-    category_id = forms.ModelChoiceField(
-        label='Kategori',
-        required=False,
-        queryset=Category.objects.all(),
-        empty_label="Pilih Kategori",
-        widget=forms.Select(attrs={
-            'id':'category',
-            'class':'form-control'
-        })
-    )
-    is_publish = forms.BooleanField(
-        label='Tampilkan?',
-        required=False,
-        widget=forms.CheckboxInput(attrs={
-            'id':'publish',
-            'data-toggle':'toggle',
-            'data-on':'Ya',
-            'data-off':'Tidak',
-            'data-onstyle':'success',
-            'data-offstyle':'danger',
-            'data-size':'sm'
-        })
-    )
-    image = forms.FileField(
-        label='Gambar',
-        required=False,
-        widget=forms.ClearableFileInput(attrs={
-            'class':'form-control-file',
-            'id':'image'
-        })
-    )
-    body = forms.CharField(
-        label='Isi',
-        required=False,
-        widget=forms.HiddenInput(attrs={'id':'body'})
-    )
      """
 
 class PostForm(ModelForm):
@@ -193,3 +169,39 @@ class PostForm(ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['category_id'].empty_label ="Pilih Kategori"
         self.fields['image'].widget.template_name = 'widget/custom_image_widget.html'
+
+class UserForm(ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email','username']
+        labels = {
+            'first_name': 'Nama Depan',
+            'last_name': 'Nama Belakang',
+            'email': 'Email',
+        }
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'id':'first_name',
+                'class': 'form-control', 
+                'placeholder': 'Nama depan',
+                'autocomple':'off'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'id':'last_name',
+                'class': 'form-control', 
+                'placeholder': 'Nama belakang',
+                'autocomple':'off'
+            }),
+            'email' : forms.EmailInput(attrs={
+                'id':'email',
+                'class': 'form-control',
+                'placeholder': 'Email',
+                'autocomple':'off'
+            }),
+            'username': forms.TextInput(attrs={
+                'id':'username',
+                'class': 'form-control', 
+                'placeholder': 'Username',
+                'autocomple':'off'
+            })   
+        }

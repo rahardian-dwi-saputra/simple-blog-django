@@ -112,3 +112,11 @@ def delete_old_image_on_change(sender, instance, **kwargs):
     if old_file and old_file != new_file:
         if os.path.isfile(old_file.path):
             os.remove(old_file.path)
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to='user_photos/', null=True, blank=True)
+    email_verified_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username

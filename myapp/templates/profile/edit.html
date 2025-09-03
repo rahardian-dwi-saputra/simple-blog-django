@@ -1,0 +1,123 @@
+{% extends "main/base.html" %}
+{% block content %}
+{% load widget_tweaks %}
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Profile</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">My Profile</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">Edit Data Profil</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <form class="form-horizontal" method="post" action="{% url 'update_profile' %}">
+                                        {% csrf_token %}
+
+                                        <div class="form-group row">
+                                            <label for="{{ form.first_name.id_for_label }}" class="col-sm-3 col-form-label">
+                                                {{ form.first_name.label }}
+                                            </label>
+                                            <div class="col-sm-9">
+                                                {% if form.first_name.errors %}
+                                                    {{ form.first_name|add_class:"is-invalid" }}
+                                                {% else %}
+                                                    {{ form.first_name }}
+                                                {% endif %}
+
+                                                {% if form.first_name.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.first_name.errors|striptags }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <label for="{{ form.last_name.id_for_label }}" class="col-sm-3 col-form-label">
+                                                {{ form.last_name.label }}
+                                            </label>
+                                            <div class="col-sm-9">
+                                                {% if form.last_name.errors %}
+                                                    {{ form.last_name|add_class:"is-invalid" }}
+                                                {% else %}
+                                                    {{ form.last_name }}
+                                                {% endif %}
+
+                                                {% if form.last_name.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.last_name.errors|striptags }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <label for="{{ form.username.id_for_label }}" class="col-sm-3 col-form-label">
+                                                {{ form.username.label }}
+                                            </label>
+                                            <div class="col-sm-9">
+                                                {% if form.username.errors %}
+                                                    {{ form.username|add_class:"is-invalid" }}
+                                                {% else %}
+                                                    {{ form.username }}
+                                                {% endif %}
+
+                                                {% if form.username.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.username.errors|striptags }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="{{ form.email.id_for_label }}" class="col-sm-3 col-form-label">
+                                                {{ form.email.label }}
+                                            </label>
+                                            <div class="col-sm-9">
+                                                {% if form.email.errors %}
+                                                    {{ form.email|add_class:"is-invalid" }}
+                                                {% else %}
+                                                    {{ form.email }}
+                                                {% endif %}
+
+                                                {% if form.email.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.email.errors|striptags }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-info">Simpan</button>&nbsp;&nbsp;
+                                        <a href="{% url 'my-profile' %}" class="btn btn-default">Kembali</a>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

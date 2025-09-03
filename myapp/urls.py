@@ -8,6 +8,12 @@ urlpatterns = [
     path("register", views.register, name="register"),
     path("login/", views.loginView, name="login"),
     path("logout/", views.logoutView, name="logout"),
+
+    #path("myprofile/create", views.create_profile, name="create_profile"),
+    path("myprofile", views.my_profile, name="my-profile"),
+    path('myprofile/update', views.update_profile, name='update_profile'),
+    path('password/change/', views.change_password, name='change_password'),
+
     path("dashboard/", views.dashboard, name="dashboard"),
     path("dashboard/detailpost/<slug:slug>/", views.show_post, name="dashboard-post-show"),
 
