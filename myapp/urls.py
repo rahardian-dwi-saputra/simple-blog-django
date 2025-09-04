@@ -13,6 +13,7 @@ urlpatterns = [
     path("myprofile", views.my_profile, name="my-profile"),
     path('myprofile/update', views.update_profile, name='update_profile'),
     path('password/change/', views.change_password, name='change_password'),
+    path('myprofile/change-photo', views.change_photo, name='change_photo'),
 
     path("dashboard/", views.dashboard, name="dashboard"),
     path("dashboard/detailpost/<slug:slug>/", views.show_post, name="dashboard-post-show"),

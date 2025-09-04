@@ -14,10 +14,10 @@
                     <a class="nav-link" href="/">Home</a>
                 </li>
                 <li class="nav-item {% if active == 'About' %} active {% endif %}">
-                    <a class="nav-link" href="/about">About</a>
+                    <a class="nav-link" href="{% url 'about' %}">About</a>
                 </li>
                 <li class="nav-item {% if active == 'Blog' %} active {% endif %}">
-                    <a class="nav-link" href="/blog">Blog</a>
+                    <a class="nav-link" href="{% url 'blog' %}">Blog</a>
                 </li>
                 <li class="nav-item {% if active == 'Categories' %} active {% endif %}">
                     <a class="nav-link" href="/blog/category">Categories</a>

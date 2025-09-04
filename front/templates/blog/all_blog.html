@@ -1,0 +1,17 @@
+{% extends "front_main/base.html" %}
+{% block content %}
+
+<h2 class="text-center mb-3 mt-3">{{ title }}</h2>
+
+<div class="row justify-content-center mb-3">
+   <div class="col-md-6">
+      <form action="/blog">
+         <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Search.." name="search" value="">
+            <button class="btn btn-primary" type="submit">Search</button>
+         </div>
+      </form>
+   </div>
+</div>
+
+{% endblock %}

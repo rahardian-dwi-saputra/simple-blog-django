@@ -1,5 +1,6 @@
 {% extends "front_main/base.html" %}
 {% block content %}
+{% load static %}
 
 {% if posts.count > 0 %}
 <h3 class="mt-3 mb-3"> Postingan Terpopuler</h3>
@@ -17,11 +18,37 @@
                 <small class="text-muted">Dibaca sebanyak {{ post.view_post }} kali</small>
             </p>
             <p class="card-text">{{ post.excerpt }}</p>
-            <a href="/blog/detail/{{ post.slug }}" class="btn btn-primary">Selengkapnya</a>
+            <a href="{% url 'blog_detail' post.slug %}" class="btn btn-primary">Selengkapnya</a>
         </div>
     </div>
     {% endfor %}
 </div>
+
+{% if users.count > 0 %}
+<h3 class="mt-3 mb-3"> Penulis Terbanyak</h3>
+<div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
+    {% for user in users %}
+    <div class="col">
+        <div class="card text-center p-3">
+            {% if user.userprofile__photo %}
+
+            {% else %}
+                <img src="{% static 'image/default-profil.png' %}" class="img-thumbnail img-fluid rounded-circle mx-auto d-block" alt="user-foto" width="150" height="150">
+            {% endif %}
+
+            <h5 class="card-title mt-1">
+                <a href="/blog/user/{{ user.username }}" class="text-decoration-none text-dark">
+                    {{ user.get_full_name }}
+                </a>
+            </h5>
+            <p class="card-text">Total Postingan : {{ user.total }}</p>
+
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 {% else %}
 <h3 class="mt-3 mb-3"> Postingan Tidak Ditemukan</h3>
 {% endif %}

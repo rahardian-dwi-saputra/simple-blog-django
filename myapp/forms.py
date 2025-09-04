@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 
-from .models import Category, Post
+from .models import Category, Post, UserProfile
 from django.forms import ModelForm
 
 class RegisterForm(UserCreationForm):
@@ -205,3 +205,8 @@ class UserForm(ModelForm):
                 'autocomple':'off'
             })   
         }
+
+class ImageProfileForm(ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['photo']

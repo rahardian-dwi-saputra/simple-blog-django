@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from . forms import RegisterForm, CustomPasswordChangeForm, CategoryForm, PostForm, UserForm
+from . forms import RegisterForm, CustomPasswordChangeForm, CategoryForm, PostForm, UserForm, ImageProfileForm
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -21,7 +21,7 @@ from django.http import JsonResponse
 from datetime import datetime
 
 #from django.http import HttpResponse
-#from .models import UserProfile
+from .models import UserProfile
 
 def register(request):
     form = RegisterForm(request.POST or None)
@@ -89,6 +89,27 @@ def change_password(request):
         form = CustomPasswordChangeForm(user=request.user)
 
     return render(request, 'profile/ubah_sandi.html', {'form': form})
+
+@login_required
+def change_photo(request):
+    if request.method == 'POST':
+
+        uploaded_file = request.FILES.get('photo')
+        if not uploaded_file:
+            return JsonResponse({
+                'success':False,
+                'error': 'No file uploaded'
+            }, status=400)
+        
+        profile = UserProfile.objects.get(user=request.user)
+        form = ImageProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+    
+    return JsonResponse({
+        'success':False,
+        'message': 'Foto profil gagal diunggah'
+    })
 
 @login_required
 def dashboard(request):

@@ -5,11 +5,11 @@ name = "pypi"
 
 [packages]
 django = "*"
-pymysql = "*"
 pillow = "*"
 django-widget-tweaks = "*"
 factory-boy = "*"
 python-dotenv = "*"
+pymysql = {extras = ["rsa"], version = "*"}
 
 [dev-packages]
 
